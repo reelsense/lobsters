@@ -70,8 +70,7 @@ class StoryRepository
   end
 
   def tagged(tag)
-    tagged = positive_ranked base_scope
-    tagged = tagged.where(
+    tagged = positive_ranked base_scope.where(
       Story.arel_table[:id].in(
         Tagging.arel_table.where(
           Tagging.arel_table[:tag_id].eq(tag.id)
@@ -119,7 +118,7 @@ private
   end
 
   def positive_ranked(scope)
-    scope.where("#{Story.score_sql} >= -1")
+    scope.where("#{Story.score_sql} >= 0")
   end
 
   def filter_tags(scope, tags)
