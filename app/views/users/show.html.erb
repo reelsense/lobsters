@@ -27,16 +27,20 @@
   <span class="d"
   <%= @showing_user.is_banned? ? raw("style=\"color: red;\"") : "" %>>
     <% if @showing_user.is_banned? %>
-      Banned
+      Banned user
     <% elsif !@showing_user.is_active? %>
-      Inactive
+      Inactive user
     <% else %>
       Active
-    <% end %>
-    <%= @showing_user.is_admin? ? "administrator" :
-      (@showing_user.is_moderator? ? "moderator" : "user") %>
-    <% if !@showing_user.can_invite? %>
-      with invites disabled
+      <%= @showing_user.is_admin? ? "administrator" :
+        (@showing_user.is_moderator? ? "moderator" : "user") %>
+      <% if !@showing_user.can_invite? %>
+        with invites
+        <% if !@showing_user.can_submit_stories? %>
+          and story submissions
+        <% end %>
+        disabled
+      <% end %>
     <% end %>
   </span>
   <br>
@@ -208,7 +212,7 @@
       <% end %>
     <% end %>
 
-    <% if !@showing_user.can_invite? %>
+    <% if @showing_user.banned_from_inviting? %>
       <%= form_tag user_enable_invite_path, :method => :post do %>
         <p>
         <%= submit_tag "Enable invitations for User" %>
