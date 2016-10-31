@@ -174,12 +174,8 @@ class User < ActiveRecord::Base
         return true
       end
     elsif obj.is_a?(Comment)
-      if obj.is_downvotable?
-        return true
-      elsif obj.current_vote.try(:vote).to_i == -1
-        # user can unvote
-        return true
-      end
+      # XXX
+      return false
     end
 
     false
@@ -217,6 +213,10 @@ class User < ActiveRecord::Base
 
   def comments_posted_count
     Keystore.value_for("user:#{self.id}:comments_posted").to_i
+  end
+
+  def update_comments_posted_count!
+    Keystore.put("user:#{self.id}:comments_posted", self.comments.active.count)
   end
 
   def delete!
