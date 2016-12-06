@@ -227,7 +227,7 @@ class Story < ActiveRecord::Base
       return false
     end
 
-    if self.tags.select{|t| t.privileged? }.any?
+    if self.taggings.select{|t| t.tag && t.tag.privileged? }.any?
       return false
     end
 
@@ -341,8 +341,7 @@ class Story < ActiveRecord::Base
   end
 
   def is_downvotable?
-    return true
-    if self.created_at
+    if self.created_at && self.score >= -5
       Time.now - self.created_at <= DOWNVOTABLE_DAYS.days
     else
       false
