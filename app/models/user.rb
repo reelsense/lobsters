@@ -33,6 +33,20 @@ class User < ActiveRecord::Base
 
   has_secure_password
 
+  typed_store :settings do |s|
+    s.boolean :email_notifications, :default => false
+    s.boolean :email_replies, :default => false
+    s.boolean :pushover_replies, :default => false
+    s.string :pushover_user_key
+    s.boolean :email_messages, :default => false
+    s.boolean :pushover_messages, :default => false
+    s.boolean :email_mentions, :default => false
+    s.boolean :show_avatars, :default => true
+    s.boolean :show_story_previews, :default => false
+    s.boolean :show_submitted_story_threads, :default => false
+    s.boolean :hide_dragons, :default => false
+  end
+
   validates :email, :format => { :with => /\A[^@ ]+@[^@ ]+\.[^@ ]+\Z/ },
     :uniqueness => { :case_sensitive => false }
 
@@ -54,9 +68,9 @@ class User < ActiveRecord::Base
     self.create_mailing_list_token
   end
 
-  BANNED_USERNAMES = [ "admin", "administrator", "hostmaster", "mailer-daemon",
-    "postmaster", "root", "security", "support", "webmaster", "moderator",
-    "moderators", "help", "contact", "fraud", "guest", "nobody", ]
+  BANNED_USERNAMES = [ "admin", "administrator", "contact", "fraud", "guest",
+    "help", "hostmaster", "mailer-daemon", "moderator", "moderators", "nobody",
+    "postmaster", "root", "security", "support", "sysop", "webmaster" ]
 
   # days old accounts are considered new for
   NEW_USER_DAYS = 7
