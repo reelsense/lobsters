@@ -21,6 +21,7 @@ body, textarea, input, button {
 
 body {
 	background-color: #fefefe;
+	line-height: 1.4em;
 }
 
 a {
@@ -117,17 +118,16 @@ select,
 textarea {
 	color: #555;
 	background-color: white;
-	line-height: 1.2em;
 	padding: 3px 5px;
 }
 textarea {
-	line-height: 1.35em;
 	resize: vertical;
 }
 input[type="text"],
 input[type="search"],
 input[type="password"],
 input[type="email"],
+input[type="number"],
 textarea {
 	border: 1px solid #ccc;
 }
@@ -372,7 +372,6 @@ ol.comments {
 	margin-left: 20px;
 	margin-bottom: 0em;
 	padding-left: 6px;
-	line-height: 1.35em;
 }
 ol.comments1 {
 	margin-left: 0;
@@ -499,7 +498,7 @@ li .link {
 }
 
 li .link a {
-	font-size: 11pt;
+	font-size: 11.5pt;
 	text-decoration: none;
 }
 
@@ -563,7 +562,7 @@ li .comment_folder_button:checked ~ ol.comments li {
 
 li .byline {
 	color: #888;
-	font-size: 9pt;
+	font-size: 9.5pt;
 }
 li .byline > img.avatar {
 	margin-bottom: -5px;
@@ -637,7 +636,6 @@ div.story_content {
 ol.stories.list div.story_content {
 	color: #777;
 	max-height: 2.6em;
-	line-height: 1.3em;
 	margin: 0.25em 40px 0.25em 0;
 	overflow: hidden;
 	text-overflow: clip;
@@ -683,12 +681,10 @@ div.page_link_buttons span {
 div.story_text {
 	margin-bottom: 1.5em;
 	max-width: 700px;
-	line-height: 1.4em;
 	word-wrap: break-word;
 }
 div.story_text p {
 	margin: 0.75em 0;
-	line-height: 1.4em;
 }
 div.story_text img {
 	max-width: 100%;
@@ -702,6 +698,7 @@ a#story_text_expander {
 }
 
 div.comment_text {
+	font-size: 10.5pt;
 	max-width: 700px;
 	word-wrap: break-word;
 }
@@ -739,13 +736,6 @@ div.comment_text p:first-child {
 
 div.comment_text code {
 	line-height: 1.2em;
-}
-
-div.comment_actions a {
-	color: #888;
-	font-weight: bold;
-	font-size: 8.5pt;
-	text-decoration: none;
 }
 
 div.dragons {
@@ -876,7 +866,6 @@ div.comment_form_container textarea {
 .tree ul {
 	margin: 0 0 0 0.5em;
 	padding: 0;
-	line-height: 1.5em;
 	list-style: none;
 	position: relative;
 }
@@ -1233,7 +1222,6 @@ div#flasher {
 div#flasher div.flash-error,
 div#flasher div.flash-notice,
 div#flasher div.flash-success {
-	line-height: 1.5em;
 	display: inline-block;
 	padding-top: 25px;
 	margin-left: auto;
