@@ -46,6 +46,8 @@ class User < ActiveRecord::Base
     s.boolean :show_submitted_story_threads, :default => false
     s.boolean :hide_dragons, :default => false
     s.string :totp_secret
+    s.string :github_oauth_token
+    s.string :github_username
   end
 
   validates :email, :format => { :with => /\A[^@ ]+@[^@ ]+\.[^@ ]+\Z/ },
@@ -113,7 +115,13 @@ class User < ActiveRecord::Base
     attrs.push :about
 
     h = super(:only => attrs)
-    h[:avatar_url] = avatar_url
+
+    h[:avatar_url] = self.avatar_url
+
+    if self.github_username.present?
+      h[:github_username] = self.github_username
+    end
+
     h
   end
 

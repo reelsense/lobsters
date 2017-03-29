@@ -17,9 +17,7 @@
 
   <% if @showing_user.is_active? %>
     <div id="gravatar">
-      <img src="<%= @showing_user.avatar_url(100) %>"
-        srcset="<%= @showing_user.avatar_url(100) %> 1x,
-        <%= @showing_user.avatar_url(200) %> 2x">
+      <%= avatar_img(@showing_user, 100) %>
     </div>
   <% end %>
 
@@ -116,6 +114,16 @@
       @showing_user.comments_posted_count %></a>
   </span>
   <br>
+
+  <% if @showing_user.github_username.present? %>
+    <label class="required">GitHub:</label>
+
+    <span class="d">
+      <a href="https://github.com/<%= h(@showing_user.github_username)
+        %>">https://github.com/<%= h(@showing_user.github_username) %></a>
+    </span>
+    <br>
+  <% end %>
 
   <% if @showing_user.is_active? %>
     <label class="required">About:</label>
