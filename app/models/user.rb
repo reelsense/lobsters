@@ -48,6 +48,9 @@ class User < ActiveRecord::Base
     s.string :totp_secret
     s.string :github_oauth_token
     s.string :github_username
+    s.string :twitter_oauth_token
+    s.string :twitter_oauth_token_secret
+    s.string :twitter_username
   end
 
   validates :email, :format => { :with => /\A[^@ ]+@[^@ ]+\.[^@ ]+\Z/ },
@@ -55,8 +58,9 @@ class User < ActiveRecord::Base
 
   validates :password, :presence => true, :on => :create
 
+  VALID_USERNAME = /[A-Za-z0-9][A-Za-z0-9_-]{0,24}/
   validates :username,
-    :format => { :with => /\A[A-Za-z0-9][A-Za-z0-9_-]{0,24}\Z/ },
+    :format => { :with => /\A#{VALID_USERNAME}\z/ },
     :uniqueness => { :case_sensitive => false }
 
   validates_each :username do |record,attr,value|
@@ -94,10 +98,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.username_regex
-    User.validators_on(:username).select{|v|
-      v.class == ActiveModel::Validations::FormatValidator }.first.
-      options[:with].inspect
+  def self.username_regex_s
+    "/^" + VALID_USERNAME.to_s.gsub(/(\?-mix:|\(|\))/, "") + "$/"
   end
 
   def as_json(options = {})
@@ -120,6 +122,10 @@ class User < ActiveRecord::Base
 
     if self.github_username.present?
       h[:github_username] = self.github_username
+    end
+
+    if self.twitter_username.present?
+      h[:twitter_username] = self.twitter_username
     end
 
     h

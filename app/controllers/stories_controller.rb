@@ -135,8 +135,8 @@ class StoriesController < ApplicationController
 
     @short_url = @story.short_id_url
 
-    @comments = @story.merged_comments.includes(:user, :story,
-      :hat).arrange_for_user(@user)
+    @comments = @story.merged_comments.includes(:user, :story, :hat,
+      :votes => :user).arrange_for_user(@user)
 
     @force_show_thread_id = nil
 
@@ -163,6 +163,10 @@ class StoriesController < ApplicationController
           "twitter:image" => Rails.application.root_url +
             "apple-touch-icon-144.png",
         }
+
+        if @story.user.twitter_username.present?
+          @meta_tags["twitter:creator"] = "@" + @story.user.twitter_username
+        end
 
         load_user_votes
 

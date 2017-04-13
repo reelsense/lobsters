@@ -138,6 +138,10 @@ class Story < ActiveRecord::Base
     Story.connection.adapter_name.match(/mysql/i) ? "signed" : "integer"
   end
 
+  def archive_url
+    "https://archive.is/#{CGI.escape(self.url)}"
+  end
+
   def as_json(options = {})
     h = [
       :short_id,
@@ -185,7 +189,8 @@ class Story < ActiveRecord::Base
   end
 
   def calculated_hotness
-    base = self.tags.map{|t| t.hotness_mod }.sum
+    base = self.tags.map{|t| t.hotness_mod }.sum +
+      (self.user_is_author ? 0.25 : 0.0)
 
     # give a story's comment votes some weight, ignoring submitter's comments
     cpoints = self.comments.
@@ -310,8 +315,22 @@ class Story < ActiveRecord::Base
 
   def fetch_story_cache!
     if self.url.present?
-      self.story_cache = StoryCacher.get_story_text(self.url)
+      self.story_cache = StoryCacher.get_story_text(self)
     end
+  end
+
+  def fix_bogus_chars
+    # this is needlessly complicated to work around character encoding issues
+    # that arise when doing just self.title.to_s.gsub(160.chr, "")
+    self.title = self.title.to_s.split("").map{|chr|
+      if chr.ord == 160
+        " "
+      else
+        chr
+      end
+    }.join("")
+
+    true
   end
 
   def generated_markeddown_description
@@ -474,20 +493,6 @@ class Story < ActiveRecord::Base
   def record_initial_upvote
     Vote.vote_thusly_on_story_or_comment_for_user_because(1, self.id, nil,
       self.user_id, nil, false)
-  end
-
-  def fix_bogus_chars
-    # this is needlessly complicated to work around character encoding issues
-    # that arise when doing just self.title.to_s.gsub(160.chr, "")
-    self.title = self.title.to_s.split("").map{|chr|
-      if chr.ord == 160
-        " "
-      else
-        chr
-      end
-    }.join("")
-
-    true
   end
 
   def score
