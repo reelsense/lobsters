@@ -33,6 +33,9 @@ class Story < ActiveRecord::Base
 
   DOWNVOTABLE_DAYS = 14
 
+  # the lowest a score can go
+  DOWNVOTABLE_MIN_SCORE = -5
+
   # after this many minutes old, a story cannot be edited
   MAX_EDIT_MINS = (60 * 6)
 
@@ -123,7 +126,11 @@ class Story < ActiveRecord::Base
   end
 
   def self.recalculate_all_hotnesses!
-    Story.all.order("id DESC").each do |s|
+    # do the front page first, since find_each can't take an order
+    Story.order("id DESC").limit(100).each do |s|
+      s.recalculate_hotness!
+    end
+    Story.find_each do |s|
       s.recalculate_hotness!
     end
     true
@@ -189,6 +196,8 @@ class Story < ActiveRecord::Base
   end
 
   def calculated_hotness
+    # take each tag's hotness modifier into effect, and give a slight bump to
+    # stories submitted by the author
     base = self.tags.map{|t| t.hotness_mod }.sum +
       (self.user_is_author ? 0.25 : 0.0)
 
@@ -209,6 +218,12 @@ class Story < ActiveRecord::Base
 
     # mix in any stories this one cannibalized
     cpoints += self.merged_stories.map{|s| s.score }.inject(&:+).to_f
+
+    # if a story has many comments but few votes, it's probably a bad story, so
+    # cap the comment points at the number of upvotes
+    if cpoints > self.upvotes
+      cpoints = self.upvotes
+    end
 
     # don't immediately kill stories at 0 by bumping up score by one
     order = Math.log([ (score + 1).abs + cpoints, 1 ].max, 10)
@@ -369,7 +384,7 @@ class Story < ActiveRecord::Base
   end
 
   def is_downvotable?
-    if self.created_at && self.score >= -5
+    if self.created_at && self.score >= DOWNVOTABLE_MIN_SCORE
       Time.now - self.created_at <= DOWNVOTABLE_DAYS.days
     else
       false
