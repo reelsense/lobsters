@@ -302,7 +302,7 @@ class Story < ActiveRecord::Base
       self.story_cache
     end
 
-    if chars > 0
+    if chars > 0 && s.to_s.length > chars
       # remove last truncated word
       s = s.to_s[0, chars].gsub(/ [^ ]*\z/, "")
     end
@@ -406,7 +406,7 @@ class Story < ActiveRecord::Base
   end
 
   def is_gone?
-    is_expired?
+    is_expired? || self.user.is_banned?
   end
 
   def is_hidden_by_user?(user)
