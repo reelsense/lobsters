@@ -142,9 +142,7 @@ class User < ActiveRecord::Base
   end
 
   def avatar_url(size = 100)
-    "https://www.gravatar.com/avatar/" +
-      Digest::MD5.hexdigest(self.email.strip.downcase) +
-      "?r=pg&d=identicon&s=#{size}"
+    Rails.application.root_url + "avatars/#{self.username}-#{size}.png"
   end
 
   def average_karma
@@ -156,47 +154,52 @@ class User < ActiveRecord::Base
   end
 
   def disable_invite_by_user_for_reason!(disabler, reason)
-    self.disabled_invite_at = Time.now
-    self.disabled_invite_by_user_id = disabler.id
-    self.disabled_invite_reason = reason
+    User.transaction do
+      self.disabled_invite_at = Time.now
+      self.disabled_invite_by_user_id = disabler.id
+      self.disabled_invite_reason = reason
+      self.save!
 
-    msg = Message.new
-    msg.deleted_by_author = true
-    msg.author_user_id = disabler.id
-    msg.recipient_user_id = self.id
-    msg.subject = "Your invite privileges have been revoked"
-    msg.body = "The reason given:\n" <<
-      "\n" <<
-      "> *#{reason}*\n" <<
-      "\n" <<
-      "*This is an automated message.*"
-    msg.save
+      msg = Message.new
+      msg.deleted_by_author = true
+      msg.author_user_id = disabler.id
+      msg.recipient_user_id = self.id
+      msg.subject = "Your invite privileges have been revoked"
+      msg.body = "The reason given:\n" <<
+        "\n" <<
+        "> *#{reason}*\n" <<
+        "\n" <<
+        "*This is an automated message.*"
+      msg.save!
 
-    m = Moderation.new
-    m.moderator_user_id = disabler.id
-    m.user_id = self.id
-    m.action = "Disabled invitations"
-    m.reason = reason
-    m.save!
+      m = Moderation.new
+      m.moderator_user_id = disabler.id
+      m.user_id = self.id
+      m.action = "Disabled invitations"
+      m.reason = reason
+      m.save!
+    end
 
     true
   end
 
   def ban_by_user_for_reason!(banner, reason)
-    self.banned_at = Time.now
-    self.banned_by_user_id = banner.id
-    self.banned_reason = reason
+    User.transaction do
+      self.banned_at = Time.now
+      self.banned_by_user_id = banner.id
+      self.banned_reason = reason
 
-    self.delete!
+      self.delete!
 
-    BanNotification.notify(self, banner, reason)
+      BanNotification.notify(self, banner, reason)
 
-    m = Moderation.new
-    m.moderator_user_id = banner.id
-    m.user_id = self.id
-    m.action = "Banned"
-    m.reason = reason
-    m.save!
+      m = Moderation.new
+      m.moderator_user_id = banner.id
+      m.user_id = self.id
+      m.action = "Banned"
+      m.reason = reason
+      m.save!
+    end
 
     true
   end
@@ -259,6 +262,25 @@ class User < ActiveRecord::Base
 
   def comments_posted_count
     Keystore.value_for("user:#{self.id}:comments_posted").to_i
+  end
+
+  def fetched_avatar(size = 100)
+    gravatar_url = "https://www.gravatar.com/avatar/" <<
+      Digest::MD5.hexdigest(self.email.strip.downcase) <<
+      "?r=pg&d=identicon&s=#{size}"
+
+    begin
+      s = Sponge.new
+      s.timeout = 3
+      res = s.fetch(gravatar_url)
+      if res.present?
+        return res
+      end
+    rescue => e
+      Rails.logger.error "error fetching #{gravatar_url}: #{e.message}"
+    end
+
+    nil
   end
 
   def update_comments_posted_count!
@@ -417,16 +439,18 @@ class User < ActiveRecord::Base
   end
 
   def enable_invite_by_user!(mod)
-    self.disabled_invite_at = nil
-    self.disabled_invite_by_user_id = nil
-    self.disabled_invite_reason = nil
-    self.save!
+    User.transaciton do
+      self.disabled_invite_at = nil
+      self.disabled_invite_by_user_id = nil
+      self.disabled_invite_reason = nil
+      self.save!
 
-    m = Moderation.new
-    m.moderator_user_id = mod.id
-    m.user_id = self.id
-    m.action = "Enabled invitations"
-    m.save!
+      m = Moderation.new
+      m.moderator_user_id = mod.id
+      m.user_id = self.id
+      m.action = "Enabled invitations"
+      m.save!
+    end
 
     true
   end
