@@ -70,6 +70,7 @@ Lobsters::Application.routes.draw do
     end
     post "/stories/fetch_url_attributes", :format => "json"
     post "/stories/preview" => "stories#preview"
+    post "/stories/check_url_dupe" => "stories#check_url_dupe"
 
     resources :comments do
       member do
@@ -107,6 +108,7 @@ Lobsters::Application.routes.draw do
     get "/u/:username" => "users#show", :as => "user", :format => /html|json/
 
     get "/avatars/:username_size.png" => "avatars#show"
+    post "/avatars/expire" => "avatars#expire"
 
     post "/users/:username/ban" => "users#ban", :as => "user_ban"
     post "/users/:username/unban" => "users#unban", :as => "user_unban"
