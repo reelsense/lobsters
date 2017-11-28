@@ -1,5 +1,6 @@
 class SignupController < ApplicationController
   before_action :require_logged_in_user, :only => :invite
+  before_action :check_for_read_only_mode
 
   def index
     if @user
@@ -49,10 +50,6 @@ class SignupController < ApplicationController
       session[:u] = @new_user.session_token
       flash[:success] = "Welcome to #{Rails.application.name}, " <<
         "#{@new_user.username}!"
-
-      Countinual.count!("#{Rails.application.shortname}.users.created", "+1")
-      Countinual.count!("#{Rails.application.shortname}.users.total",
-        User.count)
 
       return redirect_to "/signup/invite"
     else

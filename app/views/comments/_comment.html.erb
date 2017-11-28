@@ -39,6 +39,7 @@ class="comment <%= comment.current_vote ? (comment.current_vote[:vote] == 1 ?
       <% end %>
     <% end %>
   <% end %>
+
   <div class="details">
     <div class="byline">
       <a name="c_<%= comment.short_id %>"></a>
@@ -129,9 +130,12 @@ class="comment <%= comment.current_vote ? (comment.current_vote[:vote] == 1 ?
       <% if comment.is_gone? %>
         <p>
         <span class="na">
-        [<%= comment.gone_text %>]
+          [<%= comment.gone_text %><% if @user && @user.is_moderator? %> Visible to moderator:<% end %>]
         </span>
         </p>
+        <% if @user && @user.is_moderator? %>
+          <%= raw comment.markeddown_comment %>
+        <% end %>
       <% else %>
         <%= raw comment.markeddown_comment %>
       <% end %>

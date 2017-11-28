@@ -34,7 +34,7 @@ Lobsters::Application.routes.draw do
     get "/threads/:user" => "comments#threads"
 
     get "/login" => "login#index"
-    post "/login" => "login#login", :format => /html|json/
+    post "/login" => "login#login"
     post "/logout" => "login#logout"
     get "/login/2fa" => "login#twofa"
     post "/login/2fa_verify" => "login#twofa_verify", :as => "twofa_login"
@@ -89,7 +89,8 @@ Lobsters::Application.routes.draw do
     get "/comments/page/:page" => "comments#index"
     get "/comments" => "comments#index", :format => /html|rss/
 
-    get "/messages/sent" => "messages#sent"
+    get "/messages/sent" => "messages#sent", :format => /html|json/
+    get "/messages" => "messages#index", :format => /html|json/
     post "/messages/batch_delete" => "messages#batch_delete",
       :as => "batch_delete_messages"
     resources :messages do

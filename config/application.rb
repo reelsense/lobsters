@@ -61,6 +61,12 @@ class << Rails.application
     "Example News"
   end
 
+  # to force everyone to be considered logged-out (without destroying
+  # sessions) and refuse new logins
+  def read_only?
+    false
+  end
+
   def root_url
     Rails.application.routes.url_helpers.root_url({
       :host => Rails.application.domain,
@@ -68,7 +74,7 @@ class << Rails.application
     })
   end
 
-  # used as mailing list prefix and countinual prefix, cannot have spaces
+  # used as mailing list prefix, cannot have spaces
   def shortname
     name.downcase.gsub(/[^a-z]/, "")
   end
